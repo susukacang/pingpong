@@ -25,6 +25,9 @@ const players = [];
 const x0 = 200;
 const y0 = 400;
 
+const pw = 20;
+const ph = 200;
+
 btnStopGame.addEventListener('click', function () {
 	console.log('stop game');
 	stopGame();
@@ -49,6 +52,7 @@ btnCreatePlayer.addEventListener('mousedown', function () {
 	playerId = Math.random();
 	console.log('btn click create player');
 	// createPlayer(playerId)
+	move = true;
 	socket.emit('createPlayer', {
 		playerId: playerId,
 		x: x0,
@@ -76,24 +80,33 @@ function getRandomIntInclusive(min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
 }
 
-function createPlayer(playerId) {
+function createPlayer(data) {
 	const elem = document.createElement('div');
 	elem.classList.add('player');
 
-	elem.setAttribute('id', playerId);
-	elem.innerHTML = playerId;
+	elem.setAttribute('id', data);
+	elem.innerHTML = data;
 	container.appendChild(elem);
 
-	players.push(playerId);
+	players.push(data);
+
+	// for selecting player
+	elem.addEventListener('mousedown', function(e) {
+		e.preventDefault()
+		e.stopPropagation()
+		move = !move
+		console.log('mousedown', data)
+		playerId = data
+	})
 }
 // let players;
 
 // need to fix the whoami
 function deleteAllPlayers(data) {
-	let elems = document.querySelectorAll('.player')
-	console.log('delete length', elems.length, elems)
+	let elems = document.querySelectorAll('.player');
+	console.log('delete length', elems.length, elems);
 	for (const elem of elems) {
-		elem.remove()
+		elem.remove();
 		players.pop();
 	}
 }
@@ -108,16 +121,23 @@ function deletePlayer(playerId) {
 	players.pop();
 }
 
+let move = true;
+container.addEventListener('mousedown', function (e) {
+	move = !move;
+	console.log(move, e);
+});
+
 container.addEventListener('mousemove', function (e) {
 	// console.log(e.x,e.y)
 	const rect = this.getBoundingClientRect();
 	// console.log(rect)
 	// console.log(e.x,e.y,playerId)
-	socket.emit('movePlayer', {
-		playerId: playerId,
-		x: e.x - rect.left,
-		y: e.y - rect.top,
-	});
+	if (move)
+		socket.emit('movePlayer', {
+			playerId: playerId,
+			x: e.x - rect.left - pw / 2,
+			y: e.y - rect.top - ph / 2,
+		});
 });
 
 socket.on('movePlayer', function (data) {
@@ -168,13 +188,22 @@ let pos = {};
 let lastTime = new Date().getTime();
 let deltaTime = 0;
 
+// simulate client vs server computation
+let simulate = false;
+let simBall;
+let xSim = 450,
+	ySim = 350;
+let vSim = 10 / 6
+let vxSim = vSim,
+	vySim = vSim;
+
 function performAnimation() {
 	const whoami = document.querySelector('.whoami');
 
-	let ids = ''
+	let ids = '';
 	players.forEach((id) => {
-		ids += id + '<br>'
-	})
+		ids += id + '<br>';
+	});
 	// console.log(ids)
 	whoami.innerHTML = '<div>' + ids + '</div>';
 
@@ -188,6 +217,9 @@ function performAnimation() {
 
 	score.innerHTML = 'Score : ' + pos.score;
 
+	// test speed on client vs server
+	if (simulate) moveSimBall();
+
 	request = requestAnimationFrame(performAnimation);
 }
 
@@ -196,4 +228,61 @@ socket.on('ticktock', function (data) {
 	// console.log('++a', pos.date, pos.ball.x, pos.ball.y)
 });
 
+simulation();
+
 performAnimation();
+
+function simulation() {
+	if (simulate) {
+		createSimBall();
+	}
+}
+function moveSimBall() {
+	const elem = document.querySelector('#simBall');
+	// console.log(elem.getBoundingClientRect());
+	xSim += vxSim;
+	ySim += vySim;
+	elem.style.left = xSim + 'px';
+	elem.style.top = ySim + 'px';
+	elem.innerHTML = Math.round(xSim) + ', ' + Math.round(ySim);
+	checkCollision();
+}
+
+function createSimBall() {
+	const elem = document.createElement('div');
+	elem.classList.add('ball');
+
+	elem.setAttribute('id', 'simBall');
+	// elem.innerHTML = playerId;
+	container.appendChild(elem);
+
+	// console.log(elem.getBoundingClientRect());
+	elem.style.left = xSim + 'px';
+	elem.style.top = ySim + 'px';
+}
+
+function checkCollision() {
+	// const boundary = document.querySelector('#boundary')
+	// const wall = boundary.getBoundingClientRect()
+	const rightWall = 900,
+		leftWall = 100,
+		topWall = 100,
+		bottomWall = 700,
+		br = 50;
+	if (xSim + 2 * br > rightWall) {
+		vxSim = -vxSim;
+		xSim = rightWall - 2 * br;
+	}
+	if (xSim < leftWall) {
+		vxSim = -vxSim;
+		xSim = leftWall;
+	}
+	if (ySim + 2 * br > bottomWall) {
+		vySim = -vySim;
+		ySim = bottomWall - 2 * br;
+	}
+	if (ySim < topWall) {
+		vySim = -vySim;
+		ySim = topWall;
+	}
+}

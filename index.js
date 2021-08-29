@@ -16,22 +16,6 @@ let interval; //setInterval
 
 let players = [];
 
-// io.on('connection', function (socket) {
-// 	console.log('made socket connection', socket.id);
-
-// 	socket.on('chat', function (data) {
-// 		io.sockets.emit('chat', data);
-// 	});
-// });
-
-// io.on('connection', function(socket) {
-//   console.log('made socket connection', socket.id)
-
-//   socket.on('movePlayer', function(data){
-//     io.sockets.emit('movePlayer', data)
-//   })
-// })
-
 io.on('connection', function (socket) {
 	console.log(
 		'made socket connection',
@@ -50,10 +34,6 @@ io.on('connection', function (socket) {
 
 	socket.on('movePlayer', function (data) {
 		io.sockets.emit('movePlayer', data);
-		// console.log((new Date()).getTime())
-		// player[data.playerId] <- x,y
-		// players.push(data)
-		// const player = data
 		const id = players.findIndex((p) => p.playerId == data.playerId);
 
 		if (id > -1) {
@@ -176,18 +156,20 @@ io.on('connection', function (socket) {
 			// don't use p.x
 			// ball dimensions
 			const br = 50;
-			console.log(y + br > py && y - br < py + ph)
-			if (y + br > py && y - br < py + ph) {
+
+			if (y + 2 * br > py && y < py + ph) {
 				if (vx < 0) {
 					if (x < px + pw && x > px) {
 						x = px + pw;
 						vx = -vx;
+						console.log('hit1');
 					}
 				}
 				if (vx > 0) {
 					if (x + 2 * br > px && x + 2 * br < px + pw) {
 						x = px - 2 * br;
 						vx = -vx;
+						console.log('hit2');
 					}
 				}
 			}
@@ -196,12 +178,14 @@ io.on('connection', function (socket) {
 					if (Math.hypot(y + 2 * br - py) < 2.5 * dt_k) {
 						y = py - 2 * br;
 						vy = -vy;
+						console.log('hit3');
 					}
 				}
 				if (vy < 0) {
 					if (Math.hypot(y - py - ph) < 2.5 * dt_k) {
 						y = py + ph;
 						vy = -vy;
+						console.log('hit4');
 					}
 				}
 			}

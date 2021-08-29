@@ -170,3 +170,8 @@ button {
 .whoami {
 	font-size: small;
 }
+
+#simBall {
+	border: 1px solid  #526608;;
+	background: #526608;
+}
