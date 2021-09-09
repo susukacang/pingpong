@@ -72,6 +72,8 @@ button {
 	padding: 12px 0;
 	width: 100%;
 	border-radius: 0 0 2px 2px;
+	padding: 1px;
+	margin: 1px;
 }
 
 .wrapper {
@@ -125,6 +127,7 @@ button {
 	width: 20px;
 	height: 200px;
 	background: rgba(126, 133, 230, 0.295);
+	/* background: rgba(238, 80, 7, 0.61); */
 }
 
 #score {
@@ -163,6 +166,10 @@ button {
 	background: #df4c33;
 }
 
+#game {
+	display: none;
+}
+
 .player p, .whoami {
 	font-size: xx-small;
 }
@@ -174,4 +181,13 @@ button {
 #simBall {
 	border: 1px solid  #526608;;
 	background: #526608;
+}
+
+#simulate {
+	background: #2b8f30;
+}
+
+.highlight {
+	background: rgba(238, 80, 7, 0.61);
+	/* background: rgba(126, 133, 230, 0.295); */
 }

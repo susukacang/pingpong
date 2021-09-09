@@ -14,15 +14,10 @@ const ball = document.querySelector('.ball');
 
 const container = document.querySelector('.container');
 
-const btnFasterBall = document.getElementById('fasterBall');
-const btnSlowerBall = document.getElementById('slowerBall');
-
 const btnStopGame = document.getElementById('stopGame');
 const btnStartGame = document.getElementById('startGame');
 
 const score = document.getElementById('score');
-const status = document.getElementById('status');
-const speed = document.getElementById('speed');
 
 let playerId;
 let player;
@@ -32,14 +27,6 @@ const y0 = 400;
 
 const pw = 20;
 const ph = 200;
-
-btnFasterBall.addEventListener('mousedown', function () {
-	socket.emit('changeBallSpeed', {v: 1});
-});
-
-btnSlowerBall.addEventListener('mousedown', function () {
-	socket.emit('changeBallSpeed', {v: -1});
-});
 
 btnStopGame.addEventListener('click', function () {
 	console.log('stop game');
@@ -62,19 +49,19 @@ btnGame.addEventListener('click', function () {
 		socket.emit('startGame', {});
 		this.innerHTML = 'Stop Game';
 		this.style.background = '#df4c33';
-		game = false;
+		game = false
 	} else {
 		console.log('stop game');
 		// stopGame();
 		socket.emit('stopGame', {});
 		this.innerHTML = 'Start Game';
 		this.style.background = '#575ed8';
-		game = true;
+		game = true
 	}
 });
 
 function stopGame() {
-	console.log('stopGame', request);
+	console.log('stopGame', request)
 	if (request) cancelAnimationFrame(request);
 }
 
@@ -149,34 +136,13 @@ function createPlayer(data) {
 		move = !move;
 		console.log('mousedown', data);
 		playerId = data;
-		highlightPlayer(playerId);
+		highlightPlayer(playerId)
 	});
-}
-
-function movePlayer(data) {
-	const player = document.getElementById(data.playerId);
-	if (player !== null) {
-		player.style.left = Math.round(data.x) + 'px';
-		player.style.top = Math.round(data.y) + 'px';
-		player.innerHTML =
-			'<p>' +
-			data.playerId +
-			'</p>' +
-			Math.round(data.x) +
-			',' +
-			Math.round(data.y);
-	}
 }
 
 function highlightPlayer(playerId) {
-	const players = document.querySelectorAll('.player');
-	players.forEach((p) => {
-		if (p.getAttribute('id') == playerId) {
-			p.classList.add('highlight');
-		} else {
-			p.classList.remove('highlight');
-		}
-	});
+	const elem = document.getElementById(playerId);
+	elem.classList.toggle("highlight")
 }
 
 // let players;
@@ -200,26 +166,6 @@ function deletePlayer(playerId) {
 		console.log('remove?');
 	}
 	players.pop();
-}
-
-function displayPlayers() {
-	const whoami = document.querySelector('.whoami');
-
-	let ids = '';
-	players.forEach((id) => {
-		ids += id + '<br>';
-	});
-	// console.log(ids)
-	whoami.innerHTML = '<div>' + ids + '</div>';
-}
-
-function displayScore(data){
-	score.innerHTML = 'Score : ' + data.score;
-}
-
-function displaySpeed(data){
-	// console.log('display speed', data.ball.vx, data.ball.vy, data.ball.v)
-	speed.innerHTML = 'vx:' + data.ball.vx + ', vy:' + data.ball.vy + ', v:' + data.ball.v;
 }
 
 let move = true;
@@ -247,17 +193,9 @@ socket.on('movePlayer', function (data) {
 		if (data.x) {
 			// console.log(data)
 			// player.style.left = data.x + 'px';
-
-			// player.style.left = Math.round(data.x) + 'px';
-			// player.style.top = Math.round(data.y) + 'px';
-			// player.innerHTML =
-			// 	'<p>' +
-			// 	playerId +
-			// 	'</p>' +
-			// 	Math.round(data.x) +
-			// 	',' +
-			// 	Math.round(data.y);
-			movePlayer(data);
+			player.style.left = data.x + 'px';
+			player.style.top = data.y + 'px';
+			player.innerHTML = '<p>' + playerId + '</p>' + data.x + ',' + data.y;
 		}
 	}
 });
@@ -278,19 +216,14 @@ socket.on('deleteAllPlayers', function (data) {
 });
 
 socket.on('stopGame', function () {
-	stopGame();
+	stopGame()
 	console.log('stop game???!!!***');
 });
 
 socket.on('startGame', function () {
-	startGame();
+	startGame()
 	console.log('start game');
 });
-
-// socket.on('fasterBall', function (data) {
-// 	// clientData.ball.vx = data.ball.vx
-// 	console.log('faster ball...', clientData.ball.vx);
-// });
 
 const moveBall = (x, y) => {
 	// const ball = document.querySelector('.ball');
@@ -306,13 +239,6 @@ let lastTime = new Date().getTime();
 let lastTimeClient = lastTime;
 let deltaTime = 0;
 let deltaTimeClient = 0;
-let dTcc = 0; // cumulative client dT
-let dTc = 0;
-let seq = 0;
-
-let currentTimeServer = new Date().getTime();
-let lastTimeServer = lastTime;
-let deltaTimeServer = 0;
 
 // simulate client vs server computation
 let simulate = false;
@@ -323,16 +249,14 @@ let vSim = 10 / 6;
 let vxSim = vSim,
 	vySim = vSim;
 
-let i = 0;
+let i = 0
 const clientData = {
-	seq: seq,
 	date: new Date().getTime(),
 	ball: {
 		x: x0,
 		vx: 1,
 		y: y0,
 		vy: 1,
-		v: 1,
 	},
 	dt: 0,
 	players: [],
@@ -340,14 +264,12 @@ const clientData = {
 };
 
 let lastClientData = {
-	seq: seq,
 	date: new Date().getTime(),
 	ball: {
 		x: x0,
 		vx: 1,
 		y: y0,
 		vy: 1,
-		v: 1,
 	},
 	dt: 0,
 	players: [],
@@ -355,100 +277,21 @@ let lastClientData = {
 };
 
 let lastPos = {
-	seq: seq,
 	date: new Date().getTime(),
 	ball: {
 		x: x0,
 		vx: 1,
 		y: y0,
 		vy: 1,
-		v: 1,
 	},
 	dt: 0,
 	players: [],
 	score: 'score',
 };
 
-let dataBuffer = [],
-	dataBuffer2 = [];
-let ballpos = { x: 450, y: 350 };
 // let ballx = x0, bally = y0, ballvx = 1, ballvy = 1
 
-let nanim = 0;
-let j = 0;
-//  do data buffering i.e. 16 samples and do interpolation for 100ms into 16.6667ms, and delay by 100ms, so actual delayed data is seen by client
-
 function performAnimation() {
-
-	displayPlayers()
-
-	currentTimeClient = new Date().getTime();
-	deltaTimeClient = currentTimeClient - lastTimeClient;
-
-	currentTimeServer = new Date().getTime();
-	deltaTimeServer = currentTimeServer - lastTimeServer;
-
-	if (pos.ball !== undefined) {
-		if (nanim < 512 && 0) {
-			console.log('--b', pos.date, pos.ball.x, pos.ball.y);
-			console.log(
-				currentTimeClient,
-				lastTimeClient,
-				deltaTimeClient,
-				nanim,
-				'||',
-				pos.date,
-				pos.ball.x,
-				pos.ball.y,
-				'||',
-				ballpos.x,
-				ballpos.y
-			);
-		}
-		if (dataBuffer.length > 0) {
-			// console.log(clientData.seq, dataBuffer[0].seq)
-			if (clientData.seq < dataBuffer[0].seq) {
-				// this can be missed.....check....if duration exceeds p * 100ms, then warn client user that server not emitting updates
-				copyData(dataBuffer[0], clientData); // update
-				currentTimeServer = new Date().getTime();
-				deltaTimeServer = currentTimeServer - lastTimeServer;
-				// console.log(currentTimeServer, lastTimeServer, deltaTimeServer)
-				// 0.5sec server drop detect and alert
-				if (deltaTimeServer > 500) {
-					console.log(
-						'server drop',
-						currentTimeServer,
-						lastTimeServer,
-						deltaTimeServer
-					);
-					status.innerHTML = 'Server disconnected';
-				} else {
-					status.innerHTML = '';
-				}
-				lastTimeServer = currentTimeServer;
-			} else {
-				clientData.ball.x += (clientData.ball.vx * 10) / 6;
-				clientData.ball.y += (clientData.ball.vy * 10) / 6;
-				checkWallCollision();
-				// checkPlayerCollision();
-			}
-			moveBall(clientData.ball.x, clientData.ball.y);
-		}
-	}
-
-	displayScore(clientData)
-
-	displaySpeed(clientData)
-
-	if (nanim < 512 || 1) {
-		request = requestAnimationFrame(performAnimation);
-		nanim++;
-	}
-
-	lastTimeClient = currentTimeClient;
-}
-
-function performAnimation2() {
 	const whoami = document.querySelector('.whoami');
 
 	let ids = '';
@@ -458,74 +301,49 @@ function performAnimation2() {
 	// console.log(ids)
 	whoami.innerHTML = '<div>' + ids + '</div>';
 
-	// interpolateDataBuffer()
-
 	if (pos.ball !== undefined) {
-		console.log(
-			nanim,
-			deltaTimeClient,
-			pos.ball.x,
-			pos.ball.y,
-			ballpos.x,
-			ballpos.y
-		);
-
-		// dataBuffer2.push(pos)
 		// client prediction
-		if (0)
-			if (deltaTime === 0 && 0) {
-				clientData.ball.x += (clientData.ball.vx * 10) / 6; // 100Hz/60Hz * dt_k where dt_k = 10 in server
-				clientData.ball.y += (clientData.ball.vy * 10) / 6;
-				checkWallCollision();
-				moveBall(clientData.ball.x, clientData.ball.y);
-				dTcc += dTc; // cumulate dTc
-			} else {
-				// server update
-				// console.log('server update')
-				clientData.ball.x = pos.ball.x;
-				clientData.ball.y = pos.ball.y;
-				clientData.ball.vx = pos.ball.vx;
-				clientData.ball.vy = pos.ball.vy;
-				clientData.ball.x += (clientData.ball.vx * 10) / 6;
-				clientData.ball.y += (clientData.ball.vy * 10) / 6;
-				// moveBall(pos.ball.x, pos.ball.y);
-				moveBall(clientData.ball.x, clientData.ball.y);
-				dTcc = 0; // reset cumulative dTc
+		if(deltaTime === 0) {
+			clientData.ball.x += clientData.ball.vx * 10/6 // 100Hz/60Hz * dt_k where dt_k = 10 in server
+			clientData.ball.y += clientData.ball.vy * 10/6
+			checkWallCollision()
+			moveBall(clientData.ball.x, clientData.ball.y)
+		} else { // server update
+			console.log('server update')
+			clientData.ball.x = pos.ball.x
+			clientData.ball.y = pos.ball.y
+			clientData.ball.vx = pos.ball.vx
+			clientData.ball.vy = pos.ball.vy
+			clientData.ball.x += clientData.ball.vx * 10/6
+			clientData.ball.y += clientData.ball.vy * 10/6
+			// moveBall(pos.ball.x, pos.ball.y);
+			moveBall(clientData.ball.x, clientData.ball.y)
 
-				// dataBuffer2.push(pos)
-			}
-		if (dataBuffer.length > 0) {
-			ballpos.x = dataBuffer[0].ball.x;
-			ballpos.y = dataBuffer[0].ball.y;
-			moveBall(ballpos.x, ballpos.y);
-			// console.log(ball.x, ball.y, pos.ball.x, pos.ball.y)
 		}
 		// moveBall(pos.ball.x, pos.ball.y);
 		deltaTime = pos.date - lastTime;
-		currentTimeClient = new Date().getTime();
-		deltaTimeClient = currentTimeClient - lastTimeClient;
+		currentTimeClient = (new Date()).getTime()
+		deltaTimeClient = currentTimeClient - lastTimeClient
 		// console.log(++i, pos.ball.vx, pos.ball.vy, pos.date, lastTime, deltaTime, currentTimeClient, lastTimeClient, deltaTimeClient)
 		// console.log('--b', pos.date, pos.ball.x, pos.ball.y)
 		if (deltaTime < 0) console.log('danger!');
 		lastTime = pos.date;
 		lastTimeClient = currentTimeClient;
 
-		clientData.date = currentTimeClient;
-		const dXc = clientData.ball.x - lastClientData.ball.x;
-		const dYc = clientData.ball.y - lastClientData.ball.y;
-		dTc = clientData.date - lastClientData.date;
+		const dXc = clientData.ball.x - lastClientData.ball.x
+		const dYc = clientData.ball.y - lastClientData.ball.y
+		const dTc = clientData.date - lastClientData.date
 
-		lastClientData.ball.x = clientData.ball.x;
-		lastClientData.ball.y = clientData.ball.y;
-		lastClientData.date = clientData.date;
+		lastClientData = clientData
 
-		const dX = pos.ball.x - lastPos.ball.x;
-		const dY = pos.ball.y - lastPos.ball.y;
-		const dT = pos.date - lastPos.date;
-		++i;
-		// if(dT !== 0) console.log(i, pos.seq, 'dX/dT = ', dX/dT, 'dY/dT = ', dY/dT, 'dX = ', dX, 'dY = ', dY, 'dT = ', dT, 'dXc/dTc = ', dXc/dTc, 'dYc/dTc = ', dYc/dTc, 'dXc = ', dXc, 'dYc = ', dYc, 'dTc = ', dTc, 'dTcc = ', dTcc)
+		const dX = pos.ball.x - lastPos.ball.x
+		const dY = pos.ball.y - lastPos.ball.y
+		const dT = pos.date - lastPos.date
 
-		lastPos = pos;
+		console.log('dX/dT = ', dX/dT, 'dY/dT = ', dY/dT, 'dX = ', dX, 'dY = ', dY, 'dT = ', dT)
+		console.log('dXc/dTc = ', dXc/dTc, 'dYc/dTc = ', dYc/dTc, 'dXc = ', dXc, 'dYc = ', dYc, 'dTc = ', dTc)
+
+		lastPos = pos
 	}
 
 	score.innerHTML = 'Score : ' + pos.score;
@@ -533,33 +351,13 @@ function performAnimation2() {
 	// test speed on client vs server
 	if (simulate) moveSimBall();
 
-	if (nanim < 1024) {
-		request = requestAnimationFrame(performAnimation);
-		nanim++;
-	}
+	request = requestAnimationFrame(performAnimation);
 }
-let n = 0;
+
 socket.on('ticktock', function (data) {
-	if (n < 64 || 1) {
-		pos = data;
-		// console.log('++a', pos.date, pos.ball.x, pos.ball.y, pos.ball.vx, pos.ball.v);
-		// dataBuffer.push(data)
-		updateDataBuffer(data, 3);
-		n++;
-	}
+	pos = data;
+	// console.log('++a', pos.date, pos.ball.x, pos.ball.y)
 });
-
-socket.once('ticktock', (data) => {
-	console.log(data);
-	initializeWorld(data);
-});
-
-function initializeWorld(data) {
-	data.players.forEach((p) => {
-		createPlayer(p.playerId);
-		movePlayer(p);
-	});
-}
 
 // simulation();
 
@@ -644,96 +442,4 @@ function checkWallCollision() {
 		clientData.ball.vy = -clientData.ball.vy;
 		clientData.ball.y = topWall;
 	}
-}
-
-function checkPlayerCollision() {
-	// collision with players
-	const players = clientData.players;
-	let x = clientData.ball.x;
-	let y = clientData.ball.y;
-	let vx = clientData.ball.vx;
-	let vy = clientData.ball.vy;
-	let dt_k = 10; //Math.round(dt * k);
-
-	players.forEach((p) => {
-		// paddle dimensions
-		const pw = 20,
-			ph = 200;
-		// px = 200;
-		let py = p.y,
-			px = p.x;
-		// don't use p.x
-		// ball dimensions
-		const br = 50;
-
-		if (y + 2 * br > py && y < py + ph) {
-			if (vx < 0) {
-				if (x < px + pw && x > px) {
-					x = px + pw;
-					vx = -vx;
-					// console.log('hit1');
-				}
-			}
-			if (vx > 0) {
-				if (x + 2 * br > px && x + 2 * br < px + pw) {
-					x = px - 2 * br;
-					vx = -vx;
-					// console.log('hit2');
-				}
-			}
-		}
-		if (x < px && x + 2 * br > px + pw) {
-			if (vy > 0) {
-				if (Math.hypot(y + 2 * br - py) < 2.5 * dt_k) {
-					y = py - 2 * br;
-					vy = -vy;
-					// console.log('hit3');
-				}
-			}
-			if (vy < 0) {
-				if (Math.hypot(y - py - ph) < 2.5 * dt_k) {
-					y = py + ph;
-					vy = -vy;
-					// console.log('hit4');
-				}
-			}
-		}
-
-		clientData.ball.x = x;
-		clientData.ball.y = y;
-		clientData.ball.vx = vx;
-		clientData.ball.vy = vy;
-	});
-}
-
-function interpolateDataBuffer() {
-	const iFPS = 10;
-	const oFPS = 60;
-	const r = oFPS / iFPS;
-
-	dataBuffer.forEach((data) => {
-		console.log(data);
-	});
-}
-
-function updateDataBuffer(data, buflen) {
-	if (dataBuffer.length < buflen) {
-		dataBuffer.push(data);
-	} else {
-		dataBuffer.shift();
-		dataBuffer.push(data);
-	}
-}
-
-function copyData(src, dest) {
-	dest.seq = src.seq;
-	dest.date = src.date;
-	dest.ball.x = src.ball.x;
-	dest.ball.vx = src.ball.vx;
-	dest.ball.y = src.ball.y;
-	dest.ball.vy = src.ball.vy;
-	dest.ball.v = src.ball.v;
-	dest.dt = src.dt;
-	dest.players = src.players;
-	dest.score = src.score;
 }
